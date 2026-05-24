@@ -1,6 +1,6 @@
 import HeroCarousel from "@/components/HeroCarousel";
-import "./globals.css";
-import Link from "next/link";
+
+
 
 
 export default function Home() {

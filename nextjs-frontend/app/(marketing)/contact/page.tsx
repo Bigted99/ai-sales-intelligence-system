@@ -4,7 +4,7 @@ export default function ContactPage() {
   return (
     <main className="min-h-screen flex items-center justify-center px-4 py-20">
       <div className="max-w-3xl w-full text-center mb-12">
-        <h1 className="text-4xl md:text-5xl font-bold mb-4  bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 bg-clip-text text-transparent animate-gradient ">
+        <h1 className="text-4xl md:text-5xl font-bold mb-4  bg-linear-to-r from-amber-400 via-yellow-300 to-amber-500 bg-clip-text text-transparent animate-gradient ">
           Submit Your Request
         </h1>
 

@@ -40,7 +40,7 @@ export default function HeroCarousel() {
   }, []);
 
   return (
-    <section className="relative h-[80vh] min-h-[500px] overflow-hidden">
+    <section className="relative h-[80vh] min-h-125 overflow-hidden">
       {slides.map((slide, index) => (
         <div
           key={index}

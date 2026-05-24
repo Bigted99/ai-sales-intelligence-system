@@ -5,11 +5,13 @@ from app.llm import local_model
 
 
 def extract_json(text: str):
-    match = re.search(r'\{.*\}', text, re.DOTALL)
-    if match:
-        return match.group(0)
-    raise ValueError("No JSON found")
+    start = text.find('{')
+    end = text.rfind('}')
 
+    if start != -1 and end != -1:
+        return text[start:end+1]
+
+    raise ValueError("No JSON found")
 
 def qualify_lead(name: str, message: str):
     prompt = build_prompt(name, message)
@@ -19,6 +21,11 @@ def qualify_lead(name: str, message: str):
 
         # Extract clean JSON
         clean_json = extract_json(raw_response)
+        clean_json = clean_json.replace("\\_", "_")
+
+        # 🔥 optional safety (highly recommended)
+        clean_json = re.sub(r",\s*}", "}", clean_json)
+        clean_json = re.sub(r",\s*]", "]", clean_json)
 
         parsed = json.loads(clean_json)
 

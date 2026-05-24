@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-
+ 
 
 export default function ContactForm() {
   const router = useRouter();
@@ -16,7 +16,9 @@ export default function ContactForm() {
 
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
+  
    
+ 
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -27,28 +29,44 @@ export default function ContactForm() {
     });
   };
 
- const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
   e.preventDefault();
   setLoading(true);
   setStatus(null);
 
   try {
-const { data: { session } } = await supabase.auth.getSession();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
 
-const res = await fetch("/api/lead", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${session?.access_token}`, // 🔥 KEY FIX
-  },
-  body: JSON.stringify(formData),
-});
+    if (!session?.user) {
+      alert("You must be logged in");
+      setLoading(false);
+      return;
+    }
 
- console.log("User in API:", session?.user);
-   
+    // 🔥 generate per request (IMPORTANT)
+    const idempotencyKey = crypto.randomUUID();
+
+    const res = await fetch("/api/lead", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({
+        ...formData,
+        client_id: session.user.id, // ✅ real user id
+        idempotency_key: idempotencyKey, // ✅ per request
+      }),
+    });
+
+    if (!res.ok) throw new Error("Failed request");
+
+    setStatus("success");
     router.push("/thank-you");
-
   } catch (error) {
+    console.error(error);
     setStatus("error");
   } finally {
     setLoading(false);

@@ -1,18 +1,15 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
-  content: [
-    "./app/**/*.{js,ts,jsx,tsx}",
-    "./components/**/*.{js,ts,jsx,tsx}",
-  ],
+  content: ["./app/**/*.{js,ts,jsx,tsx}", "./components/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
       colors: {
-        primary: "#2D6DF6",
-        secondary: "#00C896",
-        accent: "#FFB400",
-        neutralDark: "#1A1A1A",
-        neutralLight: "#F5F7FA",
+        background: "var(--background)",
+        primary: "var(--primary)",
+        accent: "var(--accent)",
+        text: "var(--text)",
+        muted: "var(--muted)",
       },
       fontFamily: {
         heading: ["var(--font-poppins)"],
@@ -23,4 +20,4 @@ const config: Config = {
   plugins: [],
 };
 
-export default config; 
+export default config;

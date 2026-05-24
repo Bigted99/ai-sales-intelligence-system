@@ -10,7 +10,15 @@ def local_model(prompt: str) -> str:
         }
     )
 
+    print("OLLAMA STATUS:", response.status_code)
+    print("OLLAMA RAW:", response.text)
+
     if response.status_code != 200:
         raise Exception(f"Ollama error: {response.text}")
 
-    return response.json()["response"]
+    data = response.json()
+
+    if "response" not in data:
+        raise Exception(f"Unexpected Ollama response: {data}")
+
+    return data["response"]

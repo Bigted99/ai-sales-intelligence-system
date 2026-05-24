@@ -1,0 +1,1143 @@
+{
+  "name": "NextJS – AI Lead Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "nextjs-lead",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -784,
+        0
+      ],
+      "id": "f899951b-feaf-4168-a60a-c0a3cb66e81f",
+      "name": "Webhook",
+      "webhookId": "1514902a-bfa3-419b-8af2-be5c89df5f98"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "65e5ebe7-6fdb-45f7-b5f4-2be1c1fd2cbd",
+              "leftValue": "={{$json[\"intent_level\"]}}",
+              "rightValue": "high",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2544,
+        0
+      ],
+      "id": "824a40ee-8f01-47cf-a3c1-21eb85ba7610",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1b2cd8cb-fbc4-4a1f-b408-abefcf8eed8d",
+              "name": "status",
+              "value": "FAILED",
+              "type": "string"
+            },
+            {
+              "id": "9eb2c8a4-4619-4935-89dd-be68d87fdc46",
+              "name": "retry_count",
+              "value": "={{ $json.retry_count ? $json.retry_count + 1 : 1 }}",
+              "type": "string"
+            },
+            {
+              "id": "3c700b7b-8ae6-4a6d-a8e5-4d32f7479acd",
+              "name": "reason",
+              "value": "={{ $json.error?.message || \"Unknown error\" }}",
+              "type": "string"
+            },
+            {
+              "id": "cfd3953d-57d7-4b97-8a0a-f42e55464920",
+              "name": "client_id",
+              "value": "={{$json.client_id}}",
+              "type": "string"
+            },
+            {
+              "id": "3928189b-bd71-415e-8015-91e6e5c7e226",
+              "name": "original_name",
+              "value": "={{$json.name}}",
+              "type": "string"
+            },
+            {
+              "id": "72ed6a73-7999-4750-b98c-4a3959518b5a",
+              "name": "original_message",
+              "value": "={{$json.c}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        928,
+        192
+      ],
+      "id": "4a468c9e-4c56-404f-accf-6136748274f3",
+      "name": "Failed_Lead_Log",
+      "retryOnFail": true,
+      "waitBetweenTries": 3000
+    },
+    {
+      "parameters": {
+        "amount": 30
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1472,
+        192
+      ],
+      "id": "44e7a80f-e085-4501-a8b6-dd5eaaeb7ce4",
+      "name": "Wait",
+      "webhookId": "c828e2a6-6de6-44bf-826f-7c23156b6628"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "a69af067-4aa6-43cf-a63e-40015a581478",
+              "leftValue": "={{$json[\"retry_count\"]}}\n",
+              "rightValue": 3,
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1728,
+        128
+      ],
+      "id": "1b739ee2-3183-424c-8bfe-a445973062bd",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c94ee6d3-2a60-4457-9e52-7dfa869dd217",
+              "name": "retry_count",
+              "value": "={{$json[\"retry_count\"] + 1}}\n",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1984,
+        112
+      ],
+      "id": "89aba917-1e26-441b-8767-e2f85d6d24a0",
+      "name": "true-outcome"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7962fe0b-8cd9-45ce-b0bf-6d5edf3b8a6a",
+              "name": "status",
+              "value": "PERMANENT_FAILURE",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2000,
+        304
+      ],
+      "id": "ebdc7386-e172-4dce-bfdf-9c74467bbb10",
+      "name": "false-outcome"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "4cc301e9-0e14-41d0-af34-62c5d2bb7687",
+              "leftValue": "={{$json.body.email}}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "80eaca9c-063e-4682-a37c-0aed9747953f",
+              "leftValue": "={{$json.body.phone}}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -480,
+        0
+      ],
+      "id": "0f0d73f9-7799-41f4-b8f1-7e32d364581c",
+      "name": "checks for valid lead"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{$node[\"Webhook\"].json[\"body\"][\"email\"]}}\n",
+        "subject": "=Thanks for reaching out, {{$node[\"Webhook\"].json[\"body\"][\"name\"]}}!\n",
+        "message": "=Hi {{$node[\"Webhook\"].json[\"body\"][\"name\"]}},\n\nThanks for reaching out about automation for your business.\n\nWe’ve received your request and someone from our team will contact you shortly to discuss next steps.\n\nLooking forward to speaking with you.\n\nBest,\nYour Company Name\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        3008,
+        -48
+      ],
+      "id": "4beb0733-8083-413c-bb1b-72b6f2b0f651",
+      "name": "Send email to client",
+      "webhookId": "c8afd5dd-6daa-48f5-84ce-e76418f18537",
+      "retryOnFail": true,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "ZUH72Itfr6jN87I5",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "ace4real1999@gmail.com",
+        "subject": "=🔥 High Intent Lead – {{$node[\"Webhook\"].json[\"body\"][\"name\"]}}\n",
+        "message": "=New Lead Received\n\nName: {{$node[\"Webhook\"].json[\"body\"][\"name\"]}}\nEmail: {{$node[\"Webhook\"].json[\"body\"][\"email\"]}}\nPhone: {{$node[\"Webhook\"].json[\"body\"][\"phone\"]}}\n\n--------------------------------------------------\n\nAI Executive Summary:\n{{$json[\"human_summary\"]}}\n\n--------------------------------------------------\n\nKey Signals:\n\n• Qualification Score: {{$json[\"qualification_score\"]}} / 100\n• Intent Level: {{$json[\"intent_level\"]}}\n• Urgency Level: {{$json[\"urgency_level\"]}}\n• Budget Confidence: {{$json[\"budget_confidence\"]}}\n• Objection Risk: {{$json[\"objection_risk\"]}}\n• AI Confidence: {{$json[\"confidence_level\"]}}\n\n--------------------------------------------------\n\nSuggested Opening Message:\n\n\"{{$json[\"opening_message\"]}}\"\n\n--------------------------------------------------\n\nRecommended Next Step:\n{{$json[\"next_action\"]}}\n\nFollow up strategically.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        3232,
+        -48
+      ],
+      "id": "b8e72b07-e7ea-45fb-b4e2-4ac27cf3165d",
+      "name": "Send email to team",
+      "webhookId": "994ae239-554a-40b8-8067-8efbecfe2b51",
+      "retryOnFail": true,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "ZUH72Itfr6jN87I5",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "712a75d2-2782-45a5-b6f2-049357e11f5f",
+              "name": "action",
+              "value": "Add to nurture sequence",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2784,
+        144
+      ],
+      "id": "4f5ab49f-e8e7-4919-a4b6-7e2c8b3cf398",
+      "name": "Low-intent"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "82c7e58e-bb5c-4094-9ae7-239d9b6835d2",
+              "name": "=action",
+              "value": "High priority lead — notify sales immediately",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2784,
+        -48
+      ],
+      "id": "1189d346-0841-4d53-9817-3264e93c3654",
+      "name": "High-intent-true"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "78ae6a32-86a8-4be7-b5eb-ee2c44f18b65",
+              "leftValue": "={{$node[\"Webhook\"].json[\"body\"][\"phone\"]}}\nis not empty\n",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        3456,
+        -48
+      ],
+      "id": "0be60879-98a2-4e09-bb05-0190fb77e206",
+      "name": "if-phone-number"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1g5E_j6zIr7TLnNPybgBdeui6pQUE7gG-vscjFoIjslk",
+          "mode": "list",
+          "cachedResultName": "SMS_Mock_Log",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1g5E_j6zIr7TLnNPybgBdeui6pQUE7gG-vscjFoIjslk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1g5E_j6zIr7TLnNPybgBdeui6pQUE7gG-vscjFoIjslk/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{$node[\"Webhook\"].json[\"body\"][\"name\"]}}",
+            "Phone": "={{$node[\"Webhook\"].json[\"body\"][\"phone\"]}}",
+            "Timestamp": "={{$now}}",
+            "Status": "SENT (MOCK)",
+            "Message": "=Hi {{$node[\"Webhook\"].json[\"body\"][\"name\"]}},\nThanks for reaching out. A team member will call you shortly."
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Message",
+              "displayName": "Message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        3680,
+        -48
+      ],
+      "id": "54e27723-aa4d-454b-992c-218ba97c0ec9",
+      "name": "Sms_Mock",
+      "credentials": {
+        "googleApi": {
+          "id": "eeyndfxpkgYnAXg4",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e1a5eae6-0cbc-4d15-9bba-878cec6f251a",
+              "name": "client_id",
+              "value": "={{$node[\"Webhook\"].json[\"body\"][\"client_id\"]}}",
+              "type": "string"
+            },
+            {
+              "id": "70160fc1-5e2d-4ade-ae6c-8b271e2eafbb",
+              "name": "name",
+              "value": "={{$node[\"Webhook\"].json[\"body\"][\"name\"]}}",
+              "type": "string"
+            },
+            {
+              "id": "51efd470-c1f0-43d1-80c4-45e54271456d",
+              "name": "email",
+              "value": "={{$node[\"Webhook\"].json[\"body\"][\"email\"] || null}}",
+              "type": "string"
+            },
+            {
+              "id": "476a23af-b130-443a-ac56-3072d27c7e10",
+              "name": "phone",
+              "value": "={{$node[\"Webhook\"].json[\"body\"][\"phone\"]||null}}",
+              "type": "string"
+            },
+            {
+              "id": "e000cc55-1e6b-4515-bacf-1e88e6616ad4",
+              "name": "message",
+              "value": "={{$node[\"Webhook\"].json[\"body\"][\"message\"]}}",
+              "type": "string"
+            },
+            {
+              "id": "d3f5f457-9e46-4c8e-9ff8-2f4311e6e031",
+              "name": "qualification_score",
+              "value": "={{$json.qualification_score}}",
+              "type": "number"
+            },
+            {
+              "id": "7a479d76-af81-4b73-a8cb-59dd63078af5",
+              "name": "intent_level",
+              "value": "={{$json.intent_level}}",
+              "type": "string"
+            },
+            {
+              "id": "637094ad-e1ef-46b5-b739-9a1acd17960b",
+              "name": "urgency_level",
+              "value": "={{$json.urgency_level}}",
+              "type": "string"
+            },
+            {
+              "id": "19143899-5686-4698-9a39-bf29b807393b",
+              "name": "human_summary",
+              "value": "={{$json.human_summary}}",
+              "type": "string"
+            },
+            {
+              "id": "392e6132-e7cf-4e6c-9e41-f3a001bd940e",
+              "name": "objection_risk",
+              "value": "={{$json.objection_risk}}",
+              "type": "string"
+            },
+            {
+              "id": "98ea1f2a-5f97-4b0c-975e-cb64f09df07d",
+              "name": "budget_confidence",
+              "value": "={{$json.budget_confidence}}",
+              "type": "string"
+            },
+            {
+              "id": "4d5ca216-afd2-404a-b7c6-4805348bf61c",
+              "name": "opening_message",
+              "value": "={{$json.opening_message}}",
+              "type": "string"
+            },
+            {
+              "id": "9744fda3-9c5b-4c78-9d07-40d3d2889b02",
+              "name": "next_action",
+              "value": "={{$json.next_action}}",
+              "type": "string"
+            },
+            {
+              "id": "f85c2f58-3f2b-4854-9402-95f81b5e1623",
+              "name": "confidence_level",
+              "value": "={{$json.confidence_level}}",
+              "type": "string"
+            },
+            {
+              "id": "e65f6645-7976-42af-bbe9-7e5c8074c85d",
+              "name": "idempotency_key",
+              "value": "={{$node[\"Webhook\"].json[\"body\"][\"idempotency_key\"]}}",
+              "type": "string"
+            },
+            {
+              "id": "f0f2dc35-02f5-44d0-ad64-839ba6b4cf56",
+              "name": "created_at",
+              "value": "={{ $now }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        96,
+        -16
+      ],
+      "id": "eca05602-a7f4-4023-9e39-1cf92540e66e",
+      "name": "Ai Data output"
+    },
+    {
+      "parameters": {
+        "content": "Entry point — receives structured lead payload from form/API.",
+        "height": 80,
+        "width": 416,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -672,
+        -48
+      ],
+      "typeVersion": 1,
+      "id": "2d3c5f45-abc6-4900-8b2f-50a52bd98c2a",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "Ensures at least one contact method before processing.",
+        "height": 80,
+        "width": 176,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        880,
+        336
+      ],
+      "typeVersion": 1,
+      "id": "fb898a64-d943-4cb8-88a7-928e874e5140",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "Sends lead message to AI engine for structured scoring + intent classification.",
+        "height": 96,
+        "width": 480,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -112,
+        -64
+      ],
+      "typeVersion": 1,
+      "id": "b069290b-e9c0-48aa-bf8c-96f6ecb81742",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "Persists qualified lead for record keeping and analytics.",
+        "height": 80,
+        "width": 400,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        464,
+        -80
+      ],
+      "typeVersion": 1,
+      "id": "02e9b28d-9dc1-4c9a-886d-ff57069f64bb",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "Routes high-value leads into immediate notification pipeline.",
+        "height": 128,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1936,
+        -176
+      ],
+      "typeVersion": 1,
+      "id": "c2e01331-f66f-4230-9cee-8c67a385a6b7",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "Sends immediate acknowledgment to lead.",
+        "height": 80,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2000,
+        -160
+      ],
+      "typeVersion": 1,
+      "id": "e800ec55-9007-4aad-9043-9b50593caf7a",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "Optional SMS trigger layer (only executes if phone provided).",
+        "height": 80,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2496,
+        -176
+      ],
+      "typeVersion": 1,
+      "id": "158a53dc-f089-4916-9716-da6fb9c401db",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "content": "Notifies internal team with AI summary + recommended action.",
+        "height": 80,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2256,
+        -160
+      ],
+      "typeVersion": 1,
+      "id": "2d81bdd9-5826-4655-9a03-505378b16c60",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "content": "Simulates SMS delivery (replaceable with Twilio in production).",
+        "height": 80,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2784,
+        -176
+      ],
+      "typeVersion": 1,
+      "id": "1b52e7da-3445-41ff-9c3b-4c20ad92c594",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "content": "Captures execution failures for retry handling.",
+        "height": 80,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        848,
+        416
+      ],
+      "typeVersion": 1,
+      "id": "3b76fc97-11df-47bc-9eaa-1213920d7220",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "content": "Controlled retry logic to prevent data loss and infinite loops.",
+        "height": 112,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        576,
+        352
+      ],
+      "typeVersion": 1,
+      "id": "6dc6a26e-56d6-4d99-9fa0-405d3acc3a64",
+      "name": "Sticky Note10"
+    },
+    {
+      "parameters": {
+        "content": "START OF RETRY LOGIC",
+        "height": 80,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        192,
+        464
+      ],
+      "typeVersion": 1,
+      "id": "f7c390bb-c041-4827-a0e7-bd7f11e44565",
+      "name": "Sticky Note11"
+    },
+    {
+      "parameters": {
+        "content": "END OF RETRY LOGIC",
+        "height": 80,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1664,
+        352
+      ],
+      "typeVersion": 1,
+      "id": "3212634a-eb5f-4fad-8230-6874b04d1ae2",
+      "name": "Sticky Note12"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8000/qualify-lead",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "name",
+              "value": "={{$json.body.name}}"
+            },
+            {
+              "name": "message",
+              "value": "={{ $json.body.message }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -208,
+        -16
+      ],
+      "id": "8fe1d7ad-9f6f-4d88-a8ed-fba0f48e7b44",
+      "name": "HTTP Request",
+      "retryOnFail": true,
+      "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {
+        "tableId": "failed_leads",
+        "dataToSend": "autoMapInputData"
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1248,
+        192
+      ],
+      "id": "a1681dd8-3190-4690-9666-b8ada3678233",
+      "name": "failed-lead-db",
+      "credentials": {
+        "supabaseApi": {
+          "id": "6V0UXHY3atfEJQLG",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "leads",
+        "dataToSend": "autoMapInputData"
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        544,
+        -16
+      ],
+      "id": "eaa63822-932f-45ec-83df-b59c6a2a749d",
+      "name": "leads-db",
+      "alwaysOutputData": false,
+      "retryOnFail": true,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "supabaseApi": {
+          "id": "6V0UXHY3atfEJQLG",
+          "name": "Supabase account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "tableId": "leads"
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2224,
+        112
+      ],
+      "id": "1dba5f0a-277e-4336-a476-5d5b228957a7",
+      "name": "leads-db-retry",
+      "credentials": {
+        "supabaseApi": {
+          "id": "6V0UXHY3atfEJQLG",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "1788c785-cb25-41f3-95cc-1497cf7d7862",
+              "leftValue": "={{$json[\"error\"]?.[\"message\"]?.toLowerCase().includes(\"duplicate\") || false}}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        624,
+        176
+      ],
+      "id": "1be14a8f-9b0d-4eee-b266-189dbe0decc4",
+      "name": "if-error"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "checks for valid lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "High-intent-true",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Low-intent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Failed_Lead_Log": {
+      "main": [
+        [
+          {
+            "node": "failed-lead-db",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "true-outcome",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "false-outcome",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "true-outcome": {
+      "main": [
+        [
+          {
+            "node": "leads-db-retry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "checks for valid lead": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send email to client": {
+      "main": [
+        [
+          {
+            "node": "Send email to team",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send email to team": {
+      "main": [
+        [
+          {
+            "node": "if-phone-number",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "High-intent-true": {
+      "main": [
+        [
+          {
+            "node": "Send email to client",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "if-phone-number": {
+      "main": [
+        [
+          {
+            "node": "Sms_Mock",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sms_Mock": {
+      "main": [
+        []
+      ]
+    },
+    "Ai Data output": {
+      "main": [
+        [
+          {
+            "node": "leads-db",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Ai Data output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "failed-lead-db": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "leads-db": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "if-error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "leads-db-retry": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "if-error": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Failed_Lead_Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "cc63f1c1-97ed-4e00-bfc4-84a889c06d3b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0b20150adf138590155e544999a2c46b48f524babc72ebdd358c3a327e333778"
+  },
+  "id": "Z5tl68475RQMtyVb",
+  "tags": []
+}

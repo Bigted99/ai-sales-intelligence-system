@@ -65,13 +65,18 @@ urgency_level (low, medium, high)
 human_summary
 objection_risk (low, medium, high)
 budget_confidence (low, medium, high)
-opening_message
+opening_message (REQUIRED: a natural, human reply to the lead — never empty)
 next_action
 confidence_level (low, medium, high)
 
 
 STRICT RULES:
-- Return raw JSON only
-- No explanations
-- No markdown
+- Return ONLY raw JSON
+- Do NOT include any text before or after
+- opening_message MUST NEVER be empty
+- opening_message MUST be a complete, human-sounding message
+- Always include a friendly first response addressing the lead
+- Do NOT explain anything
+- Do NOT wrap in markdown
+- Output must start with {{ and end with }}
 """
