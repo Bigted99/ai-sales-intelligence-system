@@ -26,6 +26,16 @@ export function sanitizeText(value: unknown): string {
   }
 }
 
+
+export function formatStatus(status?: string) {
+  if (!status) return "New";
+
+  return status
+    .replace(/:text/g, "")
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
 export function formatNextAction(action: unknown) {
   return sanitizeText(action);
 }

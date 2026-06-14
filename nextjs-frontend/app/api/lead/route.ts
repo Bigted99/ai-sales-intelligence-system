@@ -4,17 +4,29 @@ import { createClient } from "@supabase/supabase-js";
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { name, email, phone, message, idempotency_key } = body;
+
+    const {
+      name,
+      email,
+      phone,
+      message,
+      client_id,
+      source,
+      idempotency_key,
+    } = body;
 
     if (!name || !message) {
       return NextResponse.json(
         { error: "Name and message are required." },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
     if (message.length > 2000) {
-      return NextResponse.json({ error: "Message too long." }, { status: 400 });
+      return NextResponse.json(
+        { error: "Message too long." },
+        { status: 400 }
+      );
     }
 
     const webhookUrl = process.env.N8N_WEBHOOK_URL;
@@ -22,52 +34,58 @@ export async function POST(request: Request) {
     if (!webhookUrl) {
       return NextResponse.json(
         { error: "Webhook URL not configured" },
-        { status: 500 },
+        { status: 500 }
       );
     }
 
+    let resolvedClientId = client_id;
+
     const authHeader = request.headers.get("authorization");
 
-    if (!authHeader) {
-      return NextResponse.json({ error: "No auth header" }, { status: 401 });
-    }
+    if (authHeader) {
+      const token = authHeader.replace("Bearer ", "");
 
-    const token = authHeader.replace("Bearer ", "");
-
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        global: {
-          headers: {
-            Authorization: `Bearer ${token}`, // 🔥 THIS IS THE MAGIC
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+          global: {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           },
-        },
-      },
-    );
+        }
+      );
 
-    // 🔥 Get logged-in user
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      if (user) {
+        resolvedClientId = user.id;
+      }
     }
 
-    // 🔥 Send to n8n
+    if (!resolvedClientId) {
+      return NextResponse.json(
+        { error: "Missing client id" },
+        { status: 400 }
+      );
+    }
+
     const response = await fetch(webhookUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ 
+      body: JSON.stringify({
+        client_id: resolvedClientId,
         name,
         email,
         phone,
         message,
-        client_id: user.id,
-        idempotency_key, // 🔥 ADD THIS
+        source,
+        idempotency_key,
       }),
     });
 
@@ -81,7 +99,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(
       { error: "Something went wrong" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

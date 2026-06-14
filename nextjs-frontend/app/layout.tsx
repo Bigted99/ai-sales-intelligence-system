@@ -41,7 +41,7 @@ export default function RootLayout({
                 Home
               </Link>
 
-              <Link href="/contact">
+              <Link href="/login">
                 <button className="bg-yellow-400 text-black px-6 py-3 rounded-lg font-semibold">
                   Get Started
                 </button>

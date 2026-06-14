@@ -2,30 +2,52 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { useRouter } from "next/navigation";
 import LeadMetricsChart from "@/components/dashboard/LeadMetricsChart";
 import AIInsights from "@/components/dashboard/AIInsights";
 import LeadRowComponent from "@/components/dashboard/LeadRowComponent";
 import MetricCard from "@/components/dashboard/MetricCard";
-
 
 export default function Dashboard() {
   const [leads, setLeads] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
+  const [clientId, setClientId] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     init();
   }, []);
 
+  const fetchLeads = async (clientId: string) => {
+    const { data } = await supabase
+      .from("leads")
+      .select("*")
+      .eq("client_id", clientId)
+      .order("created_at", { ascending: false });
+
+    setLeads(data || []);
+  };
+
   const init = async () => {
     const {
       data: { user },
     } = await supabase.auth.getUser();
-    console.log(user);
 
     if (!user) {
-      console.log("No user found");
+      router.push("/login");
+      return;
+    }
+
+    const { data: client } = await supabase
+      .from("clients")
+      .select("*")
+      .eq("id", user.id)
+      .single();
+
+    if (!client?.onboarding_completed) {
+      router.push("/onboarding");
       return;
     }
 
@@ -34,16 +56,34 @@ export default function Dashboard() {
       email: user.email,
     });
 
-    // 3. Fetch leads AFTER user exists
-    const { data } = await supabase
-      .from("leads")
-      .select("*")
-      .eq("client_id", user.id)
-      .order("created_at", { ascending: false });
-
-    setLeads(data || []);
+    setClientId(user.id);
+    await fetchLeads(user.id);
     setLoading(false);
   };
+
+  useEffect(() => {
+    if (!clientId) return;
+
+    const channel = supabase
+      .channel(`dashboard-${clientId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "leads",
+          filter: `client_id=eq.${clientId}`,
+        },
+        () => {
+          fetchLeads(clientId);
+        },
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [clientId]);
 
   // Create client if not exists
 
@@ -116,11 +156,12 @@ export default function Dashboard() {
 
       {/* Priority Leads */}
       <div
-        className="bg-white/70 backdrop-blur-md p-6 rounded-xl shadow hover:bg-muted/5
-hover:shadow-sm
-cursor-pointer
-transition-all
-duration-200  px-5"
+        className="
+        bg-white/70 backdrop-blur-md p-6 rounded-xl shadow 
+        hover:bg-muted/5
+         hover:shadow 
+         cursor-pointer
+         transition-all-duration-200  px-5"
       >
         <h2 className="text-xl font-semibold mb-4">🔥 Priority Leads</h2>
 
@@ -129,7 +170,7 @@ duration-200  px-5"
           .slice(0, 5)
           .map((lead) => (
             <LeadRowComponent
-             key={lead.id}
+              key={lead.id}
               id={lead.id}
               name={lead.name}
               message={lead.human_summary}
@@ -156,7 +197,7 @@ duration-200  px-5"
             .slice(0, 5)
             .map((lead) => (
               <LeadRowComponent
-               key={lead.id}
+                key={lead.id}
                 id={lead.id}
                 name={lead.name}
                 message={lead.human_summary}

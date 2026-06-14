@@ -7,19 +7,15 @@ import LeadActionsMenu from "@/components/dashboard/LeadActionsMenu";
 import MetricCard from "@/components/dashboard/MetricCard";
 import LeadTimeline from "@/components/dashboard/LeadTimeline";
 
+
 import {
   formatNextAction,
   formatSummary,
   formatOpeningMessage,
+  formatStatus,
 } from "@/lib/formatters";
 import NextActionCard from "@/components/dashboard/NextActionCard";
 import AIOutreachCard from "@/components/dashboard/AIOutreachCard";
-
-type Props = {
-  params: {
-    id: string;
-  };
-};
 
 export default function LeadDetailsPage() {
   const [lead, setLead] = useState<any>(null);
@@ -27,8 +23,35 @@ export default function LeadDetailsPage() {
   const params = useParams();
   const id = params.id as string;
   useEffect(() => {
-    fetchLead();
-  }, []);
+    if (id) {
+      fetchLead();
+    }
+  }, [id]);
+
+  useEffect(() => {
+    if (!id) return;
+
+    const channel = supabase
+      .channel(`lead-${id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "leads",
+          filter: `id=eq.${id}`,
+        },
+        () => {
+          fetchLead();
+        },
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [id]);
+
   const [activities, setActivities] = useState<any[]>([]);
   const fetchLead = async () => {
     const { data, error } = await supabase
@@ -36,7 +59,6 @@ export default function LeadDetailsPage() {
       .select("*")
       .eq("id", id)
       .maybeSingle();
-
 
     const { data: activityData } = await supabase
       .from("lead_activities")
@@ -78,12 +100,12 @@ export default function LeadDetailsPage() {
           <p className="text-sm text-muted-foreground mt-3">Updated just now</p>
           <div className="mt-3">
             <span className="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-sm">
-              {lead.status?.charAt(0).toUpperCase() + lead.status?.slice(1)}
+              {formatStatus(lead.status)}
             </span>
           </div>
         </div>
 
-        <LeadActionsMenu />
+        <LeadActionsMenu leadId={lead.id} currentStatus={lead.status} />
       </div>
       <div className="bg-white/70 backdrop-blur-md p-6 rounded-xl shadow mt-43">
         <h2 className="text-xl font-semibold mb-4">AI Summary</h2>
@@ -116,7 +138,7 @@ export default function LeadDetailsPage() {
         status="Delivered 2 mins ago"
       />
 
-    <LeadTimeline activities={activities} />
+      <LeadTimeline activities={activities} />
     </div>
   );
 }
