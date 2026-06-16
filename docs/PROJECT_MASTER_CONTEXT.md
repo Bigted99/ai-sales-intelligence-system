@@ -1,3 +1,201 @@
+# PROJECT_MASTER_CONTEXT.md
+
+# LeadAI
+
+## Product Vision
+
+LeadAI is an AI-first lead handling platform.
+
+The goal of LeadAI is to help businesses capture, qualify, communicate with, and convert leads more efficiently using AI.
+
+LeadAI is not a generic communication platform.
+
+Communication channels are inputs and outputs.
+
+The AI workflow is the product.
+
+---
+
+## Core Mission
+
+Turn every incoming lead into a structured opportunity.
+
+LeadAI should:
+
+* Capture leads
+* Qualify leads
+* Understand lead intent
+* Communicate with leads
+* Escalate to humans when necessary
+* Track conversation history
+* Provide business intelligence
+
+---
+
+## Product Philosophy
+
+Before implementing any feature ask:
+
+Does this improve LeadAI's ability to handle leads?
+
+or
+
+Does this improve LeadAI's ability to behave like a generic inbox?
+
+Prioritize lead handling.
+
+Avoid becoming another Chatwoot clone.
+
+---
+
+## Current Technology Stack
+
+Frontend
+
+* Next.js
+* TypeScript
+* TailwindCSS
+
+Backend
+
+* Supabase
+* PostgreSQL
+* Realtime
+
+Automation
+
+* n8n
+
+Artificial Intelligence
+
+* Ollama
+* Mistral 7B (production)
+* Qwen Coder (development)
+
+---
+
+## Core Entities
+
+Client
+
+Represents a business using LeadAI.
+
+Lead
+
+Represents a potential customer.
+
+Conversation
+
+Stores communication history.
+
+Lead Activity
+
+Stores actions taken on a lead.
+
+Knowledge Document
+
+Stores business knowledge.
+
+Workflow
+
+Stores automation logic.
+
+Agent
+
+Represents LeadAI reasoning systems.
+
+---
+
+## Current Product Status
+
+Completed
+
+* Lead Capture
+* Lead Qualification
+* Lead Scoring
+* Lead Summary
+* Opening Message Generation
+* Dashboard
+* Lead Details
+* Lead Status Management
+* Activities Timeline
+* Conversation Storage
+* Inbox Foundation
+* Conversation View
+* Sender Types (Lead, AI, Human)
+
+In Progress
+
+* Realtime Messaging
+* Human Reply System
+* Unread Message System
+* AI/Human Handoff
+* White Label Foundation
+
+Not Started
+
+* Knowledge Base
+* Document Upload
+* Embeddings
+* Retrieval
+* Suggested Replies
+* AI Business Context
+* Multi Channel Integrations
+* Billing
+* Team Collaboration
+
+---
+
+## Current Definition Of Success
+
+A business owner can:
+
+1. Capture leads.
+2. Understand lead quality.
+3. Track conversations.
+4. View AI insights.
+5. Respond when necessary.
+6. Move leads through a pipeline.
+7. Close more deals.
+
+---
+
+## Long Term Vision
+
+LeadAI becomes an AI sales operator.
+
+The AI should:
+
+* Understand the business
+* Understand the lead
+* Recommend actions
+* Draft responses
+* Automate repetitive communication
+* Escalate complex conversations
+
+Humans remain in control.
+
+AI increases efficiency.
+
+Businesses close more deals.
+
+---
+
+## Non Goals
+
+LeadAI is not trying to become:
+
+* A generic CRM
+* A generic messaging platform
+* A generic helpdesk
+* A social media management tool
+
+Those features are only valuable when they improve lead handling.
+
+
+
+
+
 # AI Lead Intelligence SaaS
 
 Purpose:
@@ -251,6 +449,10 @@ app/
 │   ├── page.tsx
 │   └── leads/
 │       └── [id]/
+│           └── page.tsx 
+|   └── messages/
+        └── page.tsx
+│       └── [id]/
 │           └── page.tsx
 │
 ├── client/
@@ -267,6 +469,7 @@ components/
     ├── AiInsights.tsx
     ├── AiOutreach.tsx
     ├── DashboardSidebar.tsx
+    ├── ConversationCard.tsx
     ├── LeadActionMenu.tsx
     ├── LeadMetricsMenu.tsx
     ├── LeadDetailsModal.tsx

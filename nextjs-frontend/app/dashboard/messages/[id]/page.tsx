@@ -34,6 +34,8 @@ export default function ConversationPage() {
         return;
       }
 
+
+      
       setConversation(data);
 
       const { data: history } = await supabase
@@ -87,6 +89,8 @@ export default function ConversationPage() {
                 className={`
           ${senderUi.bg}
          
+
+
           border
           p-4
           rounded-xl

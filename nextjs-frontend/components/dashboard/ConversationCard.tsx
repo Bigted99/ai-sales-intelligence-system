@@ -11,20 +11,14 @@ const formatLeadName = (name?: string) => {
 
   return name
     .split(" ")
-    .map(
-      (word) =>
-        word.charAt(0).toUpperCase() +
-        word.slice(1).toLowerCase()
-    )
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(" ");
 };
 
 const formatPreview = (message?: string) => {
   if (!message) return "";
 
-  return message.length > 120
-    ? `${message.slice(0, 120)}...`
-    : message;
+  return message.length > 50 ? `${message.slice(0, 40)}...` : message;
 };
 
 const formatChannel = (channel?: string) => {
@@ -40,32 +34,24 @@ export default function ConversationCard({
 
   return (
     <div
-      onClick={() =>
-        router.push(
-          `/dashboard/messages/${conversation.id}`
-        )
-      }
+      onClick={() => router.push(`/dashboard/messages/${conversation.id}`)}
       className="
-        bg-white/70
-        backdrop-blur-md
-        p-6
-        rounded-xl
-        shadow
-        hover:bg-muted/5
-        hover:shadow-md
-        cursor-pointer
-        transition-all
-        duration-200
-      "
+    bg-white
+    rounded-xl
+    shadow-sm
+    hover:shadow-md
+    transition-all
+    duration-200
+    cursor-pointer
+    p-5
+  "
     >
-      <h2 className="font-semibold text-lg">
-        {formatLeadName(
-          conversation.leads?.name
-        )}
-      </h2>
-
-    
-
+      <div className="flex items-start justify-between">
+        <div>
+          <h2 className="font-semibold text-lg">
+            {formatLeadName(conversation.leads?.name)}
+          </h2>
+          
       <div className="mt-3">
         <span className="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs">
           {formatChannel(
@@ -73,20 +59,32 @@ export default function ConversationCard({
           )}
         </span>
       </div>
+          {conversation.unread_count > 0 && (
+            <div className="mt-1">
+              <span
+                className="
+      bg-red-500
+      text-white
+      text-xs
+      px-2
+      py-1
+      rounded-full
+    "
+              >
+                New Reply
+              </span>
+            </div>
+          )}
 
-      <p className="mt-4 text-gray-700">
-        {formatPreview(
-          conversation.message
-        )}
-      </p>
+          <p className="text-muted-foreground mt-2">
+            {formatPreview(conversation.message)}
+          </p>
+        </div>
 
-      <p className="text-xs text-muted-foreground mt-4">
-        {new Date(
-          conversation.created_at
-        ).toLocaleString()}
-      </p>
+        <div className="text-xs text-muted-foreground whitespace-nowrap">
+          {new Date(conversation.created_at).toLocaleDateString()}
+        </div>
+      </div>
     </div>
-
-    
   );
 }
