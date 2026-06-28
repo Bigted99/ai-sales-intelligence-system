@@ -215,3 +215,96 @@ Includes:
 * Suggested Responses
 
 The inbox must become operational before the intelligence layer is introduced.
+
+
+# Current Runtime Architecture
+
+## Lead Qualification Flow
+
+Lead Submission
+↓
+n8n Webhook Trigger
+↓
+POST /qualify-lead
+↓
+FastAPI Service
+↓
+llm.py
+↓
+Ollama API (localhost:11434)
+↓
+Mistral 7B
+↓
+Qualification Response
+↓
+Supabase
+↓
+Dashboard / Inbox
+
+---
+
+## AI Layer
+
+Current Production Model:
+
+mistral:7b-instruct-q4_0
+
+The model is accessed through FastAPI.
+
+n8n does not communicate directly with Ollama.
+
+All model interaction should be routed through the Python service.
+
+---
+
+## Frontend Architecture
+
+Next.js
+↓
+Supabase
+↓
+Realtime Updates
+↓
+Dashboard
+↓
+Leads
+↓
+Inbox
+↓
+Conversation Threads
+
+---
+
+## Messaging Architecture
+
+Lead
+↓
+Conversation
+↓
+Messages Page
+
+One row per lead
+
+↓
+
+Conversation Page
+
+Full history for that lead
+
+↓
+
+Sender Types
+
+* Lead
+* AI
+* Human
+
+---
+
+## Design Principle
+
+The inbox is the operational layer.
+
+The knowledge base is the intelligence layer.
+
+Future AI features should surface through the inbox rather than creating separate interfaces.

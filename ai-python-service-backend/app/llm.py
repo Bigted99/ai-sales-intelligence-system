@@ -22,3 +22,4 @@ def local_model(prompt: str) -> str:
         raise Exception(f"Unexpected Ollama response: {data}")
 
     return data["response"]
+ 
