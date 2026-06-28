@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
- 
 
 export default function ContactForm() {
   const router = useRouter();
@@ -16,12 +15,10 @@ export default function ContactForm() {
 
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
-  
-   
- 
+  const [idempotencyKey] = useState(() => crypto.randomUUID());
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     setFormData({
       ...formData,
@@ -29,49 +26,58 @@ export default function ContactForm() {
     });
   };
 
-const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-  e.preventDefault();
-  setLoading(true);
-  setStatus(null);
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
 
-  try {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
+    if (loading) return;
+    setLoading(true);
+    setStatus(null);
 
-    if (!session?.user) {
-      alert("You must be logged in");
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session?.user) {
+        alert("You must be logged in");
+        setLoading(false);
+        return;
+      }
+
+      // 🔥 generate per request (IMPORTANT)
+
+      const res = await fetch("/api/lead", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          ...formData,
+          client_id: session.user.id, // ✅ real user id
+          idempotency_key: idempotencyKey, // ✅ per request
+        }),
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error ?? "Failed request");
+      }
+      setStatus("success");
+      setFormData({
+        name: "",
+        email: "",
+        phone: "",
+        message: "",
+      });
+      router.push("/thank-you");
+    } catch (error) {
+      console.error(error);
+      setStatus("error");
+    } finally {
       setLoading(false);
-      return;
     }
-
-    // 🔥 generate per request (IMPORTANT)
-    const idempotencyKey = crypto.randomUUID();
-
-    const res = await fetch("/api/lead", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${session.access_token}`,
-      },
-      body: JSON.stringify({
-        ...formData,
-        client_id: session.user.id, // ✅ real user id
-        idempotency_key: idempotencyKey, // ✅ per request
-      }),
-    });
-
-    if (!res.ok) throw new Error("Failed request");
-
-    setStatus("success");
-    router.push("/thank-you");
-  } catch (error) {
-    console.error(error);
-    setStatus("error");
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   return (
     <section className="w-full px-4 py-12 bg-secondary/10 flex justify-center">
@@ -120,16 +126,17 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
           />
 
           <p className="text-xs text-gray-500 mt-2">
-  Your message will be securely analyzed by AI to help our team prepare before responding.
-</p>
+            Your message will be securely analyzed by AI to help our team
+            prepare before responding.
+          </p>
 
           <button
-  type="submit"
-  disabled={loading}
-  className="w-full bg-black text-white py-3 rounded-lg font-semibold transition hover:opacity-90 disabled:opacity-50"
->
-  {loading ? "Analyzing..." : "Submit"}
-</button>
+            type="submit"
+            disabled={loading}
+            className="w-full bg-black text-white py-3 rounded-lg font-semibold transition hover:opacity-90 disabled:opacity-50"
+          >
+            {loading ? "Analyzing..." : "Submit"}
+          </button>
 
           {status === "success" && (
             <p className="text-green-600 text-sm text-center">

@@ -4,7 +4,7 @@ LANGUAGE plpgsql
 AS $$
 BEGIN
     -- Do not create a conversation if there is no message.
-    IF NEW.message IS NULL OR trim(NEW.message) = '' THEN
+   IF NEW.message IS NULL OR length(trim(NEW.message)) = 0 THEN
         RETURN NEW;
     END IF;
 
